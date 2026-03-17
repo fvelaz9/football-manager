@@ -1,0 +1,27 @@
+# --- General / IDEs ---
+.idea/
+.vscode/
+.DS_Store
+*.iml
+*.iws
+*.ipr
+
+# --- Java / Maven (Backend) ---
+target/
+.mvn/
+mvnw
+mvnw.cmd
+HELP.md
+
+# --- Node / Angular (Frontend) ---
+node_modules/
+/dist
+/.angular/cache
+/tmp
+/out-tsc
+npm-debug.log
+yarn-error.log
+
+# --- Database ---
+*.mv.db
+*.trace.db
