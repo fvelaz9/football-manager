@@ -1,0 +1,169 @@
+<div class="space-y-6">
+  <div class="flex items-end justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight">Jugadores</h2>
+      <p class="text-slate-300 text-sm">Creá jugadores y asignalos a tus formaciones.</p>
+    </div>
+    <div class="text-sm text-slate-300">
+      Total: <span class="text-slate-100 font-semibold">{{ players.length }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="rounded-lg border border-red-900/40 bg-red-950/40 px-4 py-3 text-red-200 flex items-center justify-between">
+    <span>{{ error }}</span>
+    <button class="text-red-300 hover:text-red-100 ml-4" (click)="error = null">✕</button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Form panel -->
+    <div class="lg:col-span-1">
+      <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold">{{ selected ? 'Editar jugador' : 'Nuevo jugador' }}</h3>
+          <button
+            type="button"
+            class="text-sm text-slate-300 hover:text-slate-100"
+            (click)="resetForm()"
+            *ngIf="selected"
+          >
+            Cancelar
+          </button>
+        </div>
+
+        <form class="space-y-3" (ngSubmit)="save()" #playerForm="ngForm">
+          <label class="block text-sm text-slate-300">
+            Nombre
+            <input
+              class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+              name="name"
+              [(ngModel)]="form.name"
+              placeholder="Ej: Lionel Messi"
+              required
+            />
+          </label>
+
+          <label class="block text-sm text-slate-300">
+            Posición
+            <input
+              class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+              name="position"
+              [(ngModel)]="form.position"
+              placeholder="Ej: RW"
+              required
+            />
+          </label>
+
+          <label class="block text-sm text-slate-300">
+            Número
+            <input
+              type="number"
+              class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500/60"
+              name="number"
+              [(ngModel)]="form.number"
+              placeholder="10"
+              required
+            />
+          </label>
+
+          <div class="flex gap-2 pt-2">
+            <button
+              class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-colors"
+              [disabled]="playerForm.invalid"
+              type="submit"
+            >
+              {{ selected ? 'Guardar cambios' : 'Crear jugador' }}
+            </button>
+            <button
+              type="button"
+              class="bg-slate-800 hover:bg-slate-700 text-slate-100 px-4 py-2 rounded-lg transition-colors"
+              (click)="resetForm()"
+            >
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Players grid -->
+    <div class="lg:col-span-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div
+          *ngFor="let p of players"
+          class="rounded-xl border border-slate-800 bg-slate-950/40 hover:border-slate-700 transition-colors"
+        >
+          <!-- Player info -->
+          <div class="p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-lg font-semibold leading-tight">{{ p.name }}</div>
+                <div class="text-sm text-slate-300 mt-1">{{ p.position }}</div>
+              </div>
+              <div class="shrink-0 rounded-lg bg-slate-900/70 border border-slate-700 px-2.5 py-1 text-sm font-semibold">
+                #{{ p.number }}
+              </div>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+              <button
+                class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-100 px-3 py-2 rounded-lg text-sm transition-colors"
+                (click)="edit(p)"
+              >
+                Editar
+              </button>
+              <button
+                class="bg-slate-800 hover:bg-slate-700 text-slate-100 px-3 py-2 rounded-lg text-sm transition-colors"
+                (click)="toggleExpand(p)"
+                [title]="expandedPlayerId === p.id ? 'Cerrar formaciones' : 'Ver formaciones'"
+              >
+                {{ expandedPlayerId === p.id ? '▲' : '▼' }} Formaciones
+              </button>
+              <button
+                class="bg-red-600/90 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition-colors"
+                (click)="delete(p)"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- Formation checkboxes panel -->
+          <div
+            *ngIf="expandedPlayerId === p.id"
+            class="border-t border-slate-800 px-4 py-3 bg-slate-950/60 rounded-b-xl"
+          >
+            <p class="text-xs text-slate-400 mb-2 font-medium uppercase tracking-wider">Asignar a formaciones</p>
+            <div *ngIf="formations.length === 0" class="text-slate-400 text-sm">
+              No hay formaciones creadas todavía.
+            </div>
+            <div class="space-y-2">
+              <label
+                *ngFor="let f of formations"
+                class="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2 hover:bg-slate-800/60 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  class="w-4 h-4 accent-emerald-500 cursor-pointer"
+                  [checked]="isInFormation(p, f)"
+                  (change)="toggleFormation(p, f)"
+                />
+                <span class="text-sm text-slate-200">{{ f.name }}</span>
+                <span class="ml-auto text-xs text-slate-400">{{ f.players.length }}/11</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="players.length === 0"
+          class="rounded-xl border border-dashed border-slate-700 bg-slate-950/20 p-8 text-center text-slate-300 sm:col-span-2"
+        >
+          No hay jugadores todavía. Creá el primero desde el panel de la izquierda.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

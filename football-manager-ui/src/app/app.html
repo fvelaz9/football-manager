@@ -1,0 +1,25 @@
+<div class="min-h-screen bg-slate-900 text-slate-100">
+  <header class="bg-slate-950 border-b border-slate-800">
+    <nav class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+      <div class="font-semibold text-lg">Football Manager</div>
+      <div class="space-x-4">
+        <a
+          routerLink="/players"
+          routerLinkActive="text-emerald-400"
+          class="hover:text-emerald-300 inline-flex items-center px-3 py-1.5 rounded-md transition-colors bg-slate-900/0 hover:bg-slate-800/60"
+          >Jugadores</a
+        >
+        <a
+          routerLink="/formations"
+          routerLinkActive="text-emerald-400"
+          class="hover:text-emerald-300 inline-flex items-center px-3 py-1.5 rounded-md transition-colors bg-slate-900/0 hover:bg-slate-800/60"
+          >Formaciones</a
+        >
+      </div>
+    </nav>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <router-outlet />
+  </main>
+</div>
