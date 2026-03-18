@@ -100,10 +100,10 @@
 
     <button
       class="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-3 rounded-xl font-semibold transition-colors"
-      [disabled]="!canCreate()"
+      [disabled]="!canCreate() || isSubmitting"
       (click)="createFormation()"
     >
-      Guardar formación
+      {{ isSubmitting ? 'Guardando...' : 'Guardar formación' }}
     </button>
   </div>
 

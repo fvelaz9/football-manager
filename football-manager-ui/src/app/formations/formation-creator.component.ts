@@ -101,7 +101,11 @@ export class FormationCreatorComponent implements OnInit {
     return this.newFormationName.trim().length > 0;
   }
 
+  isSubmitting = false;
+
   createFormation(): void {
+    if (this.isSubmitting) return;
+
     this.error = null;
     this.success = null;
 
@@ -110,6 +114,8 @@ export class FormationCreatorComponent implements OnInit {
       return;
     }
 
+    this.isSubmitting = true;
+
     const req: FormationRequest = {
       name: this.newFormationName.trim(),
       playerIds: Array.from(this.newSelectedPlayerIds),
@@ -117,11 +123,15 @@ export class FormationCreatorComponent implements OnInit {
 
     this.formationService.create(req).subscribe({
       next: (created) => {
+        this.isSubmitting = false;
         this.success = `Formación "${created.name}" creada correctamente.`;
         this.showCreatePanel = false;
+        this.selectedFormationId = created.id;
+        this.selectedFormation = created;
         this.loadFormations();
       },
       error: (err) => {
+        this.isSubmitting = false;
         this.error = err?.error?.message || 'Error creando la formación.';
       },
     });

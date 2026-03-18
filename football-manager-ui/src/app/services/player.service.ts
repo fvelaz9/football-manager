@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay, tap } from 'rxjs';
 import { PlayerDto } from '../models/player.model';
 
 @Injectable({
@@ -8,11 +8,17 @@ import { PlayerDto } from '../models/player.model';
 })
 export class PlayerService {
   private readonly baseUrl = 'http://localhost:8080/api/players';
+  private playersCache$: Observable<PlayerDto[]> | null = null;
 
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<PlayerDto[]> {
-    return this.http.get<PlayerDto[]>(this.baseUrl);
+    if (!this.playersCache$) {
+      this.playersCache$ = this.http.get<PlayerDto[]>(this.baseUrl).pipe(
+        shareReplay(1)
+      );
+    }
+    return this.playersCache$;
   }
 
   getById(id: number): Observable<PlayerDto> {
@@ -20,15 +26,25 @@ export class PlayerService {
   }
 
   create(player: PlayerDto): Observable<PlayerDto> {
-    return this.http.post<PlayerDto>(this.baseUrl, player);
+    return this.http.post<PlayerDto>(this.baseUrl, player).pipe(
+      tap(() => this.clearCache())
+    );
   }
 
   update(id: number, player: PlayerDto): Observable<PlayerDto> {
-    return this.http.put<PlayerDto>(`${this.baseUrl}/${id}`, player);
+    return this.http.put<PlayerDto>(`${this.baseUrl}/${id}`, player).pipe(
+      tap(() => this.clearCache())
+    );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
+      tap(() => this.clearCache())
+    );
+  }
+
+  clearCache(): void {
+    this.playersCache$ = null;
   }
 }
 

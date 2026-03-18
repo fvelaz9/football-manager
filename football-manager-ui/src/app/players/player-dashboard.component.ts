@@ -18,6 +18,7 @@ export class PlayerDashboardComponent implements OnInit {
   selected: PlayerDto | null = null;
   form: PlayerDto = { name: '', position: '', number: 0 };
   loading = false;
+  isSubmitting = false;
   error: string | null = null;
 
   // Track which player's formation panel is open
@@ -71,8 +72,6 @@ export class PlayerDashboardComponent implements OnInit {
       newPlayerIds = [...formation.players.map((p) => p.id!), player.id!];
     }
 
-    // Validate: formations must have exactly 11 players only when using the create/update endpoint.
-    // We use the removePlayer dedicated endpoint when removing, and update when adding.
     if (alreadyIn) {
       this.formationService.removePlayer(formation.id, player.id!).subscribe({
         next: (updated) => {
@@ -107,9 +106,12 @@ export class PlayerDashboardComponent implements OnInit {
   resetForm(): void {
     this.selected = null;
     this.form = { name: '', position: '', number: 0 };
+    this.isSubmitting = false;
   }
 
   save(): void {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
     this.error = null;
     const action = this.selected?.id
       ? this.playerService.update(this.selected.id!, this.form)
@@ -117,10 +119,12 @@ export class PlayerDashboardComponent implements OnInit {
 
     action.subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.resetForm();
         this.load();
       },
       error: () => {
+        this.isSubmitting = false;
         this.error = 'Error guardando jugador';
       },
     });
@@ -136,5 +140,6 @@ export class PlayerDashboardComponent implements OnInit {
     });
   }
 }
+
 
 
